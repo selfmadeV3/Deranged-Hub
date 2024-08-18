@@ -1,0 +1,308 @@
+local ac = loadstring(game:HttpGet("https://raw.githubusercontent.com/selfmadeV3/Slyv/main/Fortnote", true))()
+local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/Vape.txt"))()
+
+local win = lib:Window("Deranged Hub", Color3.fromRGB(44, 120, 224), Enum.KeyCode.RightControl)
+local magsTab = win:Tab("Mags")
+local uiColorTab = win:Tab("Change UI Color")
+local throwingTab = win:Tab("Throwing")
+local miscTab = win:Tab("Misc")
+local automaticsTab = win:Tab("Automatics")
+local playerTab = win:Tab("Player")
+local creditsTab = win:Tab("Credits")
+
+local function disableSeats()
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Seat") then
+            v.Disabled = true
+        end
+    end
+end
+
+local function fireTouch(cl, cr, football)
+    firetouchinterest(cl, football, 0)
+    task.wait(0.05)
+    firetouchinterest(cl, football, 1)
+    task.wait(0.05)
+    firetouchinterest(cr, football, 0)
+    task.wait(0.05)
+    firetouchinterest(cr, football, 1)
+end
+
+local function handleMag(reachValue)
+    local rs = game:GetService("RunService")
+    local plr = game.Players.LocalPlayer
+    _G.reach = reachValue
+
+    disableSeats()
+
+    rs.Stepped:Connect(function()
+        if plr.Character and plr.Character:FindFirstChild("CatchRight") and plr.Character:FindFirstChild("CatchLeft") then
+            local cl = plr.Character['CatchLeft']
+            local cr = plr.Character['CatchRight']
+            local desiredSize = Vector3.new(_G.reach, _G.reach, _G.reach)
+
+            if cl.Size ~= desiredSize then
+                cl.Size = desiredSize
+            end
+            if cr.Size ~= desiredSize then
+                cr.Size = desiredSize
+            end
+
+            for _, v in pairs(workspace:GetChildren()) do
+                if v.Name == "Football" then
+                    local distance = (plr.Character.HumanoidRootPart.Position - v.Position).Magnitude
+                    if distance <= _G.reach then
+                        fireTouch(cl, cr, v)
+                        break
+                    end
+                end
+            end
+        end
+        task.wait(0.1)
+    end)
+end
+
+local function showHitbox(football, size)
+    local hitbox = Instance.new("Part")
+    hitbox.Name = "Hitbox"
+    hitbox.Anchored = true
+    hitbox.CanCollide = false
+    hitbox.BrickColor = BrickColor.new("Bright red")
+    hitbox.Material = Enum.Material.SmoothPlastic
+    hitbox.Size = Vector3.new(size, size, size)
+    hitbox.Position = football.Position
+    hitbox.Transparency = 1
+    hitbox.Parent = workspace
+
+    local rs = game:GetService("RunService")
+    rs.Stepped:Connect(function()
+        if football.Parent and football.Parent:IsA("Model") and football.Parent:FindFirstChild("HumanoidRootPart") then
+            hitbox.Position = football.Position
+        else
+            hitbox:Destroy()
+        end
+    end)
+
+    local function onTouch(hit)
+        if hit:IsA("BasePart") and hit.Position.Y < 0 then
+            hitbox:Destroy()
+        end
+    end
+    football.Touched:Connect(onTouch)
+end
+
+magsTab:Button("Copy Discord to Clipboard", function()
+    setclipboard("https://discord.gg/GSVETUFxwQ")
+end)
+
+local magValue = 30
+
+magsTab:Slider("Mag Value", 0, 100, 30, function(Value)
+    handleMag(Value)
+    magValue = Value
+end)
+
+magsTab:Button("Mag Hitbox", function()
+    local size = magValue
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v.Name == "Football" and v:IsA("BasePart") then
+            v.Size = Vector3.new(size, size, size)
+            showHitbox(v, size)
+        end
+    end
+    print("Football hitbox size adjusted to:", size)
+end)
+
+magsTab:Button("Legit Mags (Mobile)", function()
+    handleMag(30.8)
+end)
+
+magsTab:Button("Pull Vector", function()
+    local function regPull()
+        local dist = 25
+        local localPlayer = game.Players.LocalPlayer
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v.Name == "Football" and v:IsA("BasePart") then
+                local distance = (v.Position - localPlayer.Character.HumanoidRootPart.Position).Magnitude
+                if distance <= dist then
+                    localPlayer.Character.HumanoidRootPart.CFrame = v.CFrame
+                    return
+                end
+            end
+        end
+    end
+    
+    regPull()
+    print("Pull Vector activated.")
+end)
+
+magsTab:Dropdown("Dropdown", {"Legit", "League", "Blatant", "Full Blatant", "Pro"}, function(t)
+    print(t)
+end)
+
+magsTab:Colorpicker("Colorpicker", Color3.fromRGB(255, 0, 0), function(t)
+    print(t)
+end)
+
+magsTab:Bind("Bind", Enum.KeyCode.RightShift, function()
+    print("Pressed!")
+end)
+
+magsTab:Label("Label")
+
+throwingTab:Button("QB Aimbot", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/selfmadeV3/Erm/main/qb", true))()
+end)
+
+miscTab:Toggle("AntiJam", false, function(t)
+    local player = game.Players.LocalPlayer
+    local rs = game:GetService("RunService")
+
+    local function disableTackling()
+        rs.Stepped:Connect(function()
+            if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                for _, part in pairs(player.Character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end)
+    end
+
+    disableTackling()
+end)
+
+local function preventClippingDuringDive()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+
+    local function enableCollide()
+        for _, part in pairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+    end
+
+    local function disableCollide()
+        task.wait(0.5)
+        for _, part in pairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+
+    local userInputService = game:GetService("UserInputService")
+    userInputService.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.Space and hrp then
+            enableCollide()
+            disableCollide()
+        end
+    end)
+end
+
+preventClippingDuringDive()
+
+uiColorTab:Colorpicker("Change UI Color", Color3.fromRGB(44, 120, 224), function(t)
+    lib:ChangePresetColor(Color3.fromRGB(t.R * 255, t.G * 255, t.B * 255))
+end)
+
+playerTab:Slider("WalkSpeed", 16, 100, 16, function(value)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+end)
+
+playerTab:Slider("JumpPower", 50, 150, 50, function(value)
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = value
+end)
+
+playerTab:Button("Reset Character", function()
+    game.Players.LocalPlayer.Character:BreakJoints()
+end)
+
+playerTab:Button("Teleport to Spawn", function()
+    local player = game.Players.LocalPlayer
+    local spawnLocation = workspace.SpawnLocation.Position
+    player.Character:SetPrimaryPartCFrame(CFrame.new(spawnLocation))
+end)
+
+playerTab:Button("Low Textures", function()
+    removeTextures()
+    print("All textures removed.")
+end)
+
+playerTab:Button("FPS Boost", function()
+    boostFPS()
+    print("FPS boosted.")
+end)
+
+if automaticsTab then
+    automaticsTab:Button("Follow Ball Carrier", function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        local hrp = character:WaitForChild("HumanoidRootPart")
+
+        local function findOpponentFootball()
+            local nearestFootball = nil
+            local shortestDistance = math.huge
+            local myTeam = player.Team
+
+            if not myTeam then
+                print("No opposite team detected")
+                return nil
+            end
+
+            for _, v in pairs(workspace:GetChildren()) do
+                if v.Name == "Football" then
+                    local carrier = v.Parent
+                    if carrier:IsA("Model") then
+                        local carrierPlayer = game.Players:GetPlayerFromCharacter(carrier)
+                        if carrierPlayer and carrierPlayer.Team ~= myTeam then
+                            local distance = (hrp.Position - v.Position).Magnitude
+                            if distance < shortestDistance then
+                                shortestDistance = distance
+                                nearestFootball = v
+                            end
+                        end
+                    end
+                end
+            end
+            return nearestFootball
+        end
+
+        local running = true
+        spawn(function()
+            while running do
+                local football = findOpponentFootball()
+                if football then
+                    print("Nearest Opponent Football Position:", football.Position)
+                    humanoid:MoveTo(football.Position)
+                    local success = humanoid.MoveToFinished:Wait(2)
+                    if success then
+                        print("Successfully moved to the opponent's football.")
+                    else
+                        print("Movement incomplete, retrying...")
+                    end
+                else
+                    print("No opponent football found.")
+                end
+                wait(1)
+            end
+        end)
+    end)
+else
+    warn("Automatics tab not created, unable to add button")
+end
+
+creditsTab:Label("Script made by: derangedpivot and Nett")
+creditsTab:Label("UI Library: Dawid-scripts")
+creditsTab:Label("Special Thanks: Developers and testers")
+creditsTab:Button("Join Discord", function()
+    setclipboard("https://discord.gg/GSVETUFxwQ")
+end)
+creditsTab:Button("Copy Script URL", function()
+    setclipboard("https://github.com/selfmadeV3/Slyv")
+end)
