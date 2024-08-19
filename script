@@ -1,6 +1,7 @@
-local ac = loadstring(game:HttpGet("https://raw.githubusercontent.com/selfmadeV3/Slyv/main/Fortnote", true))()
+local ac = loadstring(game:HttpGet("https://raw.githubusercontent.com/selfmadeV3/Slyv/main/acbypass", true))()
 local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/Vape.txt"))()
 
+-- Create Main Window and Tabs
 local win = lib:Window("Deranged Hub", Color3.fromRGB(44, 120, 224), Enum.KeyCode.RightControl)
 local magsTab = win:Tab("Mags")
 local uiColorTab = win:Tab("Change UI Color")
@@ -10,6 +11,7 @@ local automaticsTab = win:Tab("Automatics")
 local playerTab = win:Tab("Player")
 local creditsTab = win:Tab("Credits")
 
+-- Function to Disable Seats
 local function disableSeats()
     for _, v in pairs(workspace:GetDescendants()) do
         if v:IsA("Seat") then
@@ -18,6 +20,7 @@ local function disableSeats()
     end
 end
 
+-- Function to Handle FireTouch Events
 local function fireTouch(cl, cr, football)
     firetouchinterest(cl, football, 0)
     task.wait(0.05)
@@ -28,6 +31,7 @@ local function fireTouch(cl, cr, football)
     firetouchinterest(cr, football, 1)
 end
 
+-- Function to Create Mag Handling
 local function handleMag(reachValue)
     local rs = game:GetService("RunService")
     local plr = game.Players.LocalPlayer
@@ -62,6 +66,7 @@ local function handleMag(reachValue)
     end)
 end
 
+-- Function to Show Hitbox
 local function showHitbox(football, size)
     local hitbox = Instance.new("Part")
     hitbox.Name = "Hitbox"
@@ -71,18 +76,21 @@ local function showHitbox(football, size)
     hitbox.Material = Enum.Material.SmoothPlastic
     hitbox.Size = Vector3.new(size, size, size)
     hitbox.Position = football.Position
-    hitbox.Transparency = 1
+    hitbox.Transparency = 1 -- Semi-transparent
     hitbox.Parent = workspace
 
+    -- Update hitbox position to follow the football
     local rs = game:GetService("RunService")
     rs.Stepped:Connect(function()
         if football.Parent and football.Parent:IsA("Model") and football.Parent:FindFirstChild("HumanoidRootPart") then
             hitbox.Position = football.Position
         else
+            -- Remove the hitbox when the football no longer exists
             hitbox:Destroy()
         end
     end)
 
+    -- Remove hitbox when football hits the ground
     local function onTouch(hit)
         if hit:IsA("BasePart") and hit.Position.Y < 0 then
             hitbox:Destroy()
@@ -91,23 +99,24 @@ local function showHitbox(football, size)
     football.Touched:Connect(onTouch)
 end
 
+-- Mags Tab Buttons
 magsTab:Button("Copy Discord to Clipboard", function()
     setclipboard("https://discord.gg/GSVETUFxwQ")
 end)
 
-local magValue = 30
+local magValue = 30 -- Default value for the slider, will be updated dynamically
 
 magsTab:Slider("Mag Value", 0, 100, 30, function(Value)
     handleMag(Value)
-    magValue = Value
+    magValue = Value -- Update magValue with the current slider value
 end)
 
 magsTab:Button("Mag Hitbox", function()
-    local size = magValue
+    local size = magValue -- Use the current slider value
     for _, v in pairs(workspace:GetDescendants()) do
         if v.Name == "Football" and v:IsA("BasePart") then
-            v.Size = Vector3.new(size, size, size)
-            showHitbox(v, size)
+            v.Size = Vector3.new(size, size, size) -- Adjust size to the slider value
+            showHitbox(v, size) -- Show visual hitbox
         end
     end
     print("Football hitbox size adjusted to:", size)
@@ -117,6 +126,7 @@ magsTab:Button("Legit Mags (Mobile)", function()
     handleMag(30.8)
 end)
 
+-- Add Pull Vector Button
 magsTab:Button("Pull Vector", function()
     local function regPull()
         local dist = 25
@@ -136,6 +146,7 @@ magsTab:Button("Pull Vector", function()
     print("Pull Vector activated.")
 end)
 
+-- Mags Tab Dropdown and Other UI Elements
 magsTab:Dropdown("Dropdown", {"Legit", "League", "Blatant", "Full Blatant", "Pro"}, function(t)
     print(t)
 end)
@@ -150,10 +161,12 @@ end)
 
 magsTab:Label("Label")
 
+-- Throwing Tab Button
 throwingTab:Button("QB Aimbot", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/selfmadeV3/Erm/main/qb", true))()
 end)
 
+-- Misc Tab Toggle for AntiJam
 miscTab:Toggle("AntiJam", false, function(t)
     local player = game.Players.LocalPlayer
     local rs = game:GetService("RunService")
@@ -173,11 +186,13 @@ miscTab:Toggle("AntiJam", false, function(t)
     disableTackling()
 end)
 
+-- Prevent clipping during dives
 local function preventClippingDuringDive()
     local player = game.Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
     local hrp = character:FindFirstChild("HumanoidRootPart")
 
+    -- Set CanCollide to true for all character parts
     local function enableCollide()
         for _, part in pairs(character:GetChildren()) do
             if part:IsA("BasePart") then
@@ -186,8 +201,9 @@ local function preventClippingDuringDive()
         end
     end
 
+    -- Set CanCollide to false after a delay to prevent clipping
     local function disableCollide()
-        task.wait(0.5)
+        task.wait(0.5) -- Adjust delay as needed
         for _, part in pairs(character:GetChildren()) do
             if part:IsA("BasePart") then
                 part.CanCollide = false
@@ -195,6 +211,7 @@ local function preventClippingDuringDive()
         end
     end
 
+    -- Connect dive key to enabling CanCollide
     local userInputService = game:GetService("UserInputService")
     userInputService.InputBegan:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.Space and hrp then
@@ -206,10 +223,12 @@ end
 
 preventClippingDuringDive()
 
+-- UI Color Tab Colorpicker
 uiColorTab:Colorpicker("Change UI Color", Color3.fromRGB(44, 120, 224), function(t)
     lib:ChangePresetColor(Color3.fromRGB(t.R * 255, t.G * 255, t.B * 255))
 end)
 
+-- Player Tab Buttons and Sliders
 playerTab:Slider("WalkSpeed", 16, 100, 16, function(value)
     game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
 end)
@@ -245,10 +264,11 @@ if automaticsTab then
         local humanoid = character:WaitForChild("Humanoid")
         local hrp = character:WaitForChild("HumanoidRootPart")
 
+        -- Function to find the nearest football carried by an opposing team player
         local function findOpponentFootball()
             local nearestFootball = nil
             local shortestDistance = math.huge
-            local myTeam = player.Team
+            local myTeam = player.Team  -- Get the player's team
 
             if not myTeam then
                 print("No opposite team detected")
@@ -261,6 +281,7 @@ if automaticsTab then
                     if carrier:IsA("Model") then
                         local carrierPlayer = game.Players:GetPlayerFromCharacter(carrier)
                         if carrierPlayer and carrierPlayer.Team ~= myTeam then
+                            -- Check distance only for opposing team footballs
                             local distance = (hrp.Position - v.Position).Magnitude
                             if distance < shortestDistance then
                                 shortestDistance = distance
@@ -273,13 +294,16 @@ if automaticsTab then
             return nearestFootball
         end
 
+        -- Main loop to move toward the nearest opponent football
         local running = true
         spawn(function()
             while running do
                 local football = findOpponentFootball()
                 if football then
-                    print("Nearest Opponent Football Position:", football.Position)
+                    print("Nearest Opponent Football Position:", football.Position)  -- Confirm football position
+                    -- Move the character towards the football's position
                     humanoid:MoveTo(football.Position)
+                    -- Wait to check if the movement is successful
                     local success = humanoid.MoveToFinished:Wait(2)
                     if success then
                         print("Successfully moved to the opponent's football.")
@@ -289,7 +313,7 @@ if automaticsTab then
                 else
                     print("No opponent football found.")
                 end
-                wait(1)
+                wait(1)  -- Adjust the wait time as needed
             end
         end)
     end)
@@ -297,6 +321,7 @@ else
     warn("Automatics tab not created, unable to add button")
 end
 
+-- Credits Tab
 creditsTab:Label("Script made by: derangedpivot and Nett")
 creditsTab:Label("UI Library: Dawid-scripts")
 creditsTab:Label("Special Thanks: Developers and testers")
