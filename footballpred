@@ -2,17 +2,17 @@ FootballLandingPredictions = true
 }
 
 local function beamProjectile(g, v0, x0, t1)
-    -- Calculate the bezier points
+    
     local c = 0.5 * 0.5 * 0.5
     local p3 = 0.5 * g * t1 * t1 + v0 * t1 + x0
     local p2 = p3 - (g * t1 * t1 + v0 * t1) / 3
     local p1 = (c * g * t1 * t1 + 0.5 * v0 * t1 + x0 - c * (x0 + p3)) / (3 * c) - p2
 
-    -- The curve sizes
+    
     local curve0 = (p1 - x0).magnitude
     local curve1 = (p2 - p3).magnitude
 
-    -- Build the world CFrames for the attachments
+    
     local b = (x0 - p3).unit
     local r1 = (p1 - x0).unit
     local u1 = r1:Cross(b).unit
@@ -76,10 +76,10 @@ eventConnection = workspace.ChildAdded:Connect(function(b)
         beam.Width0 = 1
         beam.Width1 = 1
         
-        -- Check for football landing
+        
         local landedConnection
         landedConnection = RunService.Heartbeat:Connect(function()
-            if b.Velocity.magnitude < 1 then  -- Adjust this threshold as needed
+            if b.Velocity.magnitude < 1 then  
                 beam:Destroy()
                 a0:Destroy()
                 a1:Destroy()
